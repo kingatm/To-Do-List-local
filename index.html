@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced To-Do App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      width: 80%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .left-pane {
+      width: 50%;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .right-pane {
+      width: 50%;
+      padding: 20px;
+    }
+
+    #new-task {
+      border: none;
+      outline: none; /* Removes border and outlines */
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: text; /* Ensures text cursor is visible */
+    }
+
+    #task-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    #task-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #task-list li.completed {
+      text-decoration: line-through;
+      color: grey;
+    }
+
+    #task-list li button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-left: 10px;
+    }
+
+    form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-weight: 700; /* Increased font weight */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left pane with task list -->
+    <div class="left-pane">
+      <h2>TASK LIST</h2>
+      <p>Your tasks are saved in the local storage.</p>
+      <ul id="task-list">
+        <!-- Tasks will be dynamically added here -->
+      </ul>
+    </div>
+
+    <!-- Right pane with task form -->
+    <div class="right-pane">
+      <h2>I need to...</h2>
+      <form id="task-form">
+        <textarea id="new-task" placeholder="I need to..." required></textarea>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Auto-focus the textarea when page loads
+    window.onload = () => {
+      document.getElementById('new-task').focus();
+    };
+
+    // Get tasks from local storage or initialize empty array
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // Elements
+    const taskList = document.getElementById('task-list');
+    const taskInput = document.getElementById('new-task');
+
+    // Display tasks
+    function displayTasks() {
+      taskList.innerHTML = ''; // Clear list
+      tasks.forEach((task, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = task.completed ? 'completed' : '';
+
+        const taskText = document.createElement('span');
+        taskText.textContent = task.name;
+
+        // Checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.addEventListener('change', () => toggleTaskCompletion(index));
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '&times;'; // Cross icon
+        deleteBtn.addEventListener('click', () => deleteTask(index));
+
+        // Append elements to list item
+        listItem.append(taskText, checkbox, deleteBtn);
+        taskList.appendChild(listItem);
+      });
+    }
+
+    // Add task when pressing Enter in textarea
+    taskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addTask(taskInput.value);
+      }
+    });
+
+    // Add new task
+    function addTask(name) {
+      if (name.trim() === '') return;
+      tasks.push({ name: name, completed: false });
+      taskInput.value = ''; // Clear input
+      saveTasks();
+      displayTasks();
+    }
+
+    // Toggle task completion
+    function toggleTaskCompletion(index) {
+      tasks[index].completed = !tasks[index].completed;
+      saveTasks();
+      displayTasks();
+    }
+
+    // Delete task
+    function deleteTask(index) {
+      tasks.splice(index, 1); // Remove task from array
+      saveTasks();
+      displayTasks();
+    }
+
+    // Save tasks to local storage
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Initial display of tasks
+    displayTasks();
+  </script>
+</body>
+</html>
